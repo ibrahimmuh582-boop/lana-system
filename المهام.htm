@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة المهام المتقدم Pro v2.3 - لانا الطبية (احترافي)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a4d2e;
+            --primary-light: #2d6a4f;
+            --accent: #c9a962;
+            --accent-dark: #b8860b;
+            --bg-dark: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-card: #1f2937;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --success: #2ea44f;
+            --warning: #d29922;
+            --danger: #da3633;
+            --info: #1f6feb;
+            --purple: #8957e5;
+            --border: rgba(201, 169, 98, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo { margin-bottom: 2rem; text-align: center; }
+        .logo h1 { font-family: 'Amiri', serif; font-size: 1.6rem; color: var(--accent); margin-bottom: 0.3rem; }
+        .logo p { font-size: 0.8rem; color: var(--text-secondary); }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 0.8rem;
+            margin-bottom: 0.3rem; border-radius: 6px; cursor: pointer;
+            transition: all 0.3s; color: var(--text-secondary); font-size: 0.9rem;
+        }
+        .nav-item:hover, .nav-item.active { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: var(--accent); }
+        .nav-item .badge { margin-right: auto; background: var(--danger); color: white; padding: 0.1rem 0.4rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+
+        /* Categories Styles */
+        .cat-nav-item {
+            display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0.8rem;
+            cursor: pointer; color: var(--text-secondary); font-size: 0.85rem; border-radius: 4px;
+            transition: 0.2s;
+        }
+        .cat-nav-item:hover, .cat-nav-item.active { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+        .cat-nav-item.active { border-right: 2px solid var(--accent); }
+        .cat-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content { padding: 1.5rem 2rem; }
+
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+        }
+        .header h2 { font-size: 1.8rem; color: var(--text-primary); }
+        .header-actions { display: flex; gap: 0.8rem; }
+
+        .btn {
+            padding: 0.6rem 1.2rem; border: none; border-radius: 6px;
+            font-family: 'Cairo', sans-serif; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: var(--bg-dark); box-shadow: 0 4px 15px rgba(201, 169, 98, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(201, 169, 98, 0.4); }
+        .btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-secondary:hover { border-color: var(--accent); }
+        .btn-small { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+
+        /* ===== SEARCH, FILTERS & SORTING ===== */
+        .filters { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .search-box { flex: 1; position: relative; }
+        .search-box input {
+            width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; background: var(--bg-card);
+            border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary);
+            font-family: 'Cairo', sans-serif;
+        }
+        .search-box input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.1); }
+        .search-box::before { content: '🔍'; position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); font-size: 0.9rem; }
+        
+        /* Style for the new select element */
+        .filters select {
+            padding: 0.6rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.9rem;
+            appearance: none; 
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b949e'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 0.8rem center;
+            background-size: 1em;
+            cursor: pointer;
+        }
+        .filters select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.1); }
+
+
+        /* ===== TASKS GRID/LIST ===== */
+        .tasks-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+        .tasks-grid.tiles-view { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+        
+        .tasks-grid.tiles-view .task-card { 
+            min-height: 220px;
+            display: flex; 
+            flex-direction: column; 
+            padding: 1rem;
+        }
+        .tasks-grid.tiles-view .task-actions { margin-top: auto; }
+        .tasks-grid.list-view { grid-template-columns: 1fr; }
+
+        /* KANBAN BOARD VIEW */
+        .tasks-grid.board-view {
+            display: grid;
+            grid-template-columns: repeat(4, 280px);
+            gap: 1rem;
+            overflow-x: auto;
+            align-items: start;
+            padding-bottom: 1rem;
+            height: calc(100vh - 250px);
+        }
+
+        .kanban-column {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 0.8rem;
+            min-height: 200px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        
+        /* Enable drop target */
+        .kanban-tasks {
+            min-height: 100px; /* Ensure drop target is visible */
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .kanban-header {
+            padding-bottom: 0.6rem;
+            border-bottom: 2px solid var(--border);
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .tasks-grid.board-view .task-card {
+            background: var(--bg-card);
+            min-height: auto;
+            border: 1px solid var(--border);
+            padding: 0.8rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            cursor: grab; /* Professional cursor for draggable elements */
+            transition: transform 0.2s;
+        }
+        .tasks-grid.board-view .task-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        .tasks-grid.board-view .task-card:active { cursor: grabbing; }
+
+
+        /* View Switcher */
+        .view-mode-switcher {
+            display: flex; gap: 0.3rem; margin-bottom: 1rem; padding: 0.3rem;
+            background: var(--bg-card); border-radius: 8px; width: fit-content; border: 1px solid var(--border);
+        }
+        .view-mode-btn {
+            padding: 0.4rem 1rem; background: transparent; border: none; color: var(--text-secondary);
+            cursor: pointer; border-radius: 5px; font-family: 'Cairo', sans-serif; font-weight: 600;
+            font-size: 0.85rem; transition: all 0.3s; display: flex; align-items: center; gap: 0.4rem;
+        }
+        .view-mode-btn:hover { background: rgba(201, 169, 98, 0.1); color: var(--accent); }
+        .view-mode-btn.active { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: var(--bg-dark); }
+
+        /* Task Card Styles */
+        .task-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+            padding: 1.2rem; transition: all 0.3s; position: relative;
+        }
+        .task-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+
+        .task-header { display: flex; justify-content: space-between; margin-bottom: 0.6rem; }
+        .task-title { font-size: 1rem; font-weight: 600; color: var(--text-primary); cursor: pointer; line-height: 1.3; }
+        .task-title:hover { color: var(--accent); }
+        
+        .task-badges { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+        .badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 500; }
+        
+        .badge-urgent { background: rgba(218, 54, 51, 0.15); color: var(--danger); border: 1px solid var(--danger); }
+        .badge-important { background: rgba(210, 153, 34, 0.15); color: var(--warning); border: 1px solid var(--warning); }
+        .badge-normal { background: rgba(139, 148, 158, 0.15); color: var(--text-secondary); border: 1px solid var(--text-secondary); }
+        .badge-completed { background: rgba(46, 164, 79, 0.15); color: var(--success); border: 1px solid var(--success); }
+        .badge-category { background: rgba(137, 87, 229, 0.15); color: var(--purple); border: 1px solid var(--purple); }
+        
+        .progress-bar { height: 6px; background: rgba(201, 169, 98, 0.1); border-radius: 3px; overflow: hidden; margin: 0.6rem 0; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-dark)); transition: width 0.6s; }
+        
+        .task-actions { display: flex; gap: 0.4rem; justify-content: flex-end; margin-top: 0.6rem; }
+        .action-btn {
+            padding: 0.3rem 0.6rem; background: transparent; border: 1px solid var(--border);
+            border-radius: 4px; cursor: pointer; transition: all 0.3s; color: var(--text-secondary); font-size: 0.8rem;
+        }
+        .action-btn:hover { background: var(--accent); color: var(--bg-dark); border-color: var(--accent); }
+
+        /* ===== MODAL & FORMS ===== */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); z-index: 1000;
+            align-items: center; justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--bg-secondary); padding: 2rem; border-radius: 12px;
+            max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;
+            border: 1px solid var(--accent); box-shadow: 0 30px 90px rgba(0,0,0,0.8);
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border);
+        }
+        .close-modal { background: transparent; border: none; font-size: 1.8rem; color: var(--text-secondary); cursor: pointer; }
+        .close-modal:hover { color: var(--danger); }
+
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-group label { color: var(--text-primary); font-weight: 600; font-size: 0.85rem; }
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 0.7rem; background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text-primary); font-family: 'Cairo', sans-serif; font-size: 0.9rem;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.1);
+        }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 0.8rem; margin-bottom: 1.2rem; border-bottom: 2px solid var(--border); overflow-x: auto; }
+        .tab {
+            padding: 0.6rem 1.2rem; background: transparent; border: none; color: var(--text-secondary);
+            cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; position: relative; white-space: nowrap;
+        }
+        .tab.active { color: var(--accent); }
+        .tab.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: var(--accent); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Others */
+        .subtask-item {
+            display: flex; align-items: center; gap: 0.6rem; background: var(--bg-card);
+            padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 0.4rem;
+        }
+        
+        .file-upload {
+            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1.5rem;
+            background: var(--bg-card); border: 2px dashed var(--border); border-radius: 8px;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .file-upload:hover { border-color: var(--accent); }
+        .file-upload input[type="file"] { display: none; }
+
+        /* Lists */
+        .dept-item, .cat-item {
+            display: flex; justify-content: space-between; padding: 0.5rem;
+            background: var(--bg-card); margin-bottom: 0.5rem; border-radius: 4px; border: 1px solid var(--border);
+        }
+
+        /* ===== TOAST NOTIFICATIONS ===== */
+        .toast-container {
+            position: fixed; bottom: 2rem; left: 2rem; z-index: 2000;
+            display: flex; flex-direction: column; gap: 0.5rem;
+        }
+        .toast {
+            background: var(--bg-card); border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem;
+            border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: flex;
+            align-items: center; gap: 0.8rem; animation: slideIn 0.3s ease; min-width: 250px;
+        }
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        @keyframes slideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .app-container { grid-template-columns: 1fr; }
+            .sidebar { position: relative; height: auto; padding: 1rem; }
+            .tasks-grid.board-view { grid-template-columns: repeat(4, 250px); }
+            .tasks-grid.tiles-view { grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>⚕️ لانا الطبية</h1>
+                <p>نظام إدارة المهام المتقدم Pro</p>
+            </div>
+
+            <nav>
+                <div class="nav-item active" onclick="setView('all')">
+                    <span>📋</span> <span>جميع المهام</span> <span class="badge" id="totalBadge">0</span>
+                </div>
+                <div class="nav-item" onclick="setView('urgent')">
+                    <span>🔥</span> <span>المهام العاجلة</span> <span class="badge" id="urgentBadge">0</span>
+                </div>
+                <div class="nav-item" onclick="setView('today')">
+                    <span>📅</span> <span>مهام اليوم</span>
+                </div>
+                <div class="nav-item" onclick="setView('overdue')">
+                    <span>⚠️</span> <span>المتأخرة</span> <span class="badge" id="overdueBadge">0</span>
+                </div>
+                <div class="nav-item" onclick="openStatsModal()">
+                    <span>📊</span> <span>الإحصائيات</span>
+                </div>
+                <div class="nav-item" onclick="openDeptsModal()">
+                    <span>🏢</span> <span>إدارة الأقسام</span>
+                </div>
+            </nav>
+
+            <div style="margin-top: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                    <h3 style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600;">🏷️ الفئات السريعة</h3>
+                    <button class="btn-small btn-secondary" onclick="openCatsModal()" title="إدارة الفئات">⚙️</button>
+                </div>
+                <div id="quickCategories" style="display: flex; flex-direction: column; gap: 0.2rem;">
+                    </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div>
+                    <h2 id="pageTitle">جميع المهام</h2>
+                    <p id="pageSubtitle" style="color: var(--text-secondary); margin-top: 0.3rem;">إدارة شاملة لمهامك التنفيذية</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="exportDataCSV()">📥 تصدير Excel</button>
+                    <button class="btn btn-primary" onclick="openTaskModal()">➕ مهمة جديدة</button>
+                </div>
+            </header>
+
+            <div class="view-mode-switcher">
+                <button class="view-mode-btn" onclick="switchViewMode('list')" id="viewList"><span>📋</span> قائمة</button>
+                <button class="view-mode-btn active" onclick="switchViewMode('tiles')" id="viewTiles"><span>🔲</span> Tiles</button>
+                <button class="view-mode-btn" onclick="switchViewMode('board')" id="viewBoard"><span>📊</span> كانبان</button>
+            </div>
+
+            <div class="filters">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="ابحث في المهام، المسؤول، القسم، التصنيف..." onkeyup="filterTasks()">
+                </div>
+                <select id="sortCriteria" onchange="renderTasks()" class="btn-secondary">
+                    <option value="createdAtDesc" selected>🆕 الأحدث إنشاءً</option>
+                    <option value="dueDateAsc">📅 الأقدم استحقاقاً</option>
+                    <option value="priorityDesc">🔥 الأولوية</option>
+                </select>
+                </div>
+
+            <div class="tasks-grid" id="tasksList"></div>
+        </main>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">✨ مهمة جديدة</h2>
+                <button class="close-modal" onclick="closeTaskModal()">×</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('details')">📋 التفاصيل</button>
+                <button class="tab" onclick="switchTab('subtasks')">☑️ المهام الفرعية</button>
+                <button class="tab" onclick="switchTab('documents')">📎 المستندات</button>
+                <button class="tab" onclick="switchTab('comments')">💬 التعليقات</button>
+		
+            </div>
+
+            <form id="taskForm">
+                <div id="tab-details" class="tab-content active">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>عنوان المهمة *</label>
+                            <input type="text" id="taskTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label>القسم</label>
+                            <select id="taskDepartment"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>التصنيف (الفئة)</label>
+                            <select id="taskCategory">
+                                <option value="">-- اختر التصنيف --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>المسؤول</label>
+                            <input type="text" id="taskResponsible" value="معاذ">
+                        </div>
+                        <div class="form-group">
+                            <label>الموافق المطلوب</label>
+                            <input type="text" id="taskApprover" placeholder="المدير التنفيذي، مدير القسم...">
+                        </div>
+                        <div class="form-group">
+                            <label>تاريخ الاستحقاق</label>
+                            <input type="date" id="taskDueDate">
+                        </div>
+                        <div class="form-group">
+                            <label>الأولوية</label>
+                            <select id="taskPriority">
+                                <option value="عاجل">🔴 عاجل</option>
+                                <option value="مهم">🟡 مهم</option>
+                                <option value="عادي">⚪ عادي</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الحالة</label>
+                            <select id="taskStatus">
+                                <option value="جديد">جديد</option>
+                                <option value="قيد التنفيذ">قيد التنفيذ</option>
+                                <option value="معلق">معلق</option>
+                                <option value="مكتمل">مكتمل</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>الوصف</label>
+                            <textarea id="taskNotes" rows="4"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-subtasks" class="tab-content">
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                        <input type="text" id="newSubtaskInput" placeholder="أضف خطوة فرعية..." style="flex: 1;">
+                        <button type="button" class="btn btn-primary" onclick="addSubtask()">+</button>
+                    </div>
+                    <div id="subtasksList" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                </div>
+
+                <div id="tab-documents" class="tab-content">
+                    <div id="taskDocuments"></div>
+                    <label class="file-upload" style="margin-top: 1rem;">
+                        <input type="file" multiple onchange="handleFileUpload(event)">
+                        <span>📤</span>
+                        <span>اختر ملفات (بدون حد أقصى للحجم)</span>
+                    </label>
+                    <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.5rem;">تنبيه: الملفات تحفظ في المتصفح.</p>
+                </div>
+
+                <div id="tab-comments" class="tab-content">
+                    <div id="taskComments"></div>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <textarea id="newComment" placeholder="اكتب تعليقاً..." rows="2" style="flex: 1; padding: 0.5rem; border-radius: 8px; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary);"></textarea>
+                        <button type="button" class="btn btn-primary" onclick="addComment()">إرسال</button>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                    <button type="button" class="btn btn-secondary" onclick="closeTaskModal()">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">💾 حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="deptsModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>🏢 إدارة الأقسام</h2>
+                <button class="close-modal" onclick="closeDeptsModal()">×</button>
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                <input type="text" id="newDeptInput" placeholder="اسم القسم الجديد..." style="flex: 1; padding: 0.7rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: white;">
+                <button class="btn btn-primary" onclick="addNewDept()">إضافة</button>
+            </div>
+            <div id="deptsList"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="catsModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>🏷️ إدارة الفئات (التصنيفات)</h2>
+                <button class="close-modal" onclick="closeCatsModal()">×</button>
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                <input type="text" id="newCatInput" placeholder="اسم الفئة الجديدة..." style="flex: 1; padding: 0.7rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: white;">
+                <button class="btn btn-primary" onclick="addNewCat()">إضافة</button>
+            </div>
+            <div id="catsList"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="statsModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>📊 الإحصائيات</h2>
+                <button class="close-modal" onclick="document.getElementById('statsModal').classList.remove('active')">×</button>
+            </div>
+            <div id="statsContent" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; text-align: center;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        let tasks = JSON.parse(localStorage.getItem('tasks_pro_v2')) || [];
+        
+        let defaultDepts = ['الصيانة', 'الشؤون التنظيمية', 'المشتريات', 'الشراكات الدولية', 'إدارة المخلفات', 'الموارد البشرية'];
+        let departments = JSON.parse(localStorage.getItem('depts_pro')) || defaultDepts;
+
+        // New: Categories Storage
+        let defaultCats = ['تطوير', 'إداري', 'اجتماع', 'مشروع', 'شخصي'];
+        let categories = JSON.parse(localStorage.getItem('categories_pro')) || defaultCats;
+
+        let viewMode = 'tiles'; // tiles, list, board
+        let currentView = 'all'; // all, urgent, today, overdue, category:XYZ
+        let editingTaskId = null;
+        let tempSubtasks = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (tasks.length === 0) initSampleData();
+            switchViewMode('tiles');
+            renderTasks();
+            updateBadges();
+            renderQuickCategoriesSidebar(); // Updated
+        });
+
+        // Sample Data
+        function initSampleData() {
+            const now = new Date();
+            const oneWeekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            
+            const sample1 = {
+                id: Date.now(),
+                title: 'اجتماع مع شركة Solar Company',
+                department: 'الشراكات الدولية',
+                category: 'اجتماع', // New Field
+                responsible: 'معاذ',
+                approver: 'المدير العام',
+                dueDate: oneWeekLater.toISOString().split('T')[0],
+                priority: 'عاجل',
+                status: 'قيد التنفيذ',
+                notes: 'متابعة مشاكل الأجهزة مع الشركة',
+                subtasks: [
+                    { text: 'تجهيز العرض التقديمي', completed: true },
+                    { text: 'حجز القاعة', completed: false }
+                ],
+                documents: [],
+                comments: [],
+                createdAt: now.toISOString()
+            };
+             const sample2 = {
+                id: Date.now() + 1,
+                title: 'مراجعة إجراءات السلامة الجديدة',
+                department: 'الشؤون التنظيمية',
+                category: 'إداري',
+                responsible: 'خالد',
+                approver: 'مدير الشؤون',
+                dueDate: now.toISOString().split('T')[0], // Due today
+                priority: 'مهم',
+                status: 'جديد',
+                notes: 'التأكد من تحديث كافة المستندات',
+                subtasks: [],
+                documents: [],
+                comments: [],
+                createdAt: yesterday.toISOString()
+            };
+            tasks.push(sample1, sample2);
+            saveTasks();
+        }
+
+        function saveTasks() { localStorage.setItem('tasks_pro_v2', JSON.stringify(tasks)); }
+        function saveDepts() { localStorage.setItem('depts_pro', JSON.stringify(departments)); }
+        function saveCats() { localStorage.setItem('categories_pro', JSON.stringify(categories)); }
+
+        // --- CATEGORIES MANAGER ---
+        function openCatsModal() {
+            renderCatsManager();
+            document.getElementById('catsModal').classList.add('active');
+        }
+
+        function closeCatsModal() {
+            document.getElementById('catsModal').classList.remove('active');
+            renderQuickCategoriesSidebar(); // Update sidebar on close
+        }
+
+        function renderCatsManager() {
+            const container = document.getElementById('catsList');
+            container.innerHTML = categories.map(c => `
+                <div class="cat-item">
+                    <span>${c}</span>
+                    <button onclick="removeCat('${c}')" style="background:none; border:none; color:var(--danger); cursor:pointer;">🗑️ حذف</button>
+                </div>
+            `).join('');
+        }
+
+        function addNewCat() {
+            const input = document.getElementById('newCatInput');
+            const val = input.value.trim();
+            if (val && !categories.includes(val)) {
+                categories.push(val);
+                saveCats();
+                renderCatsManager();
+                input.value = '';
+                showToast('تمت إضافة الفئة', 'success');
+            } else if (categories.includes(val)) {
+                showToast('الفئة موجودة بالفعل', 'error');
+            }
+        }
+
+        function removeCat(cat) {
+            if (confirm(`حذف فئة "${cat}"؟`)) {
+                categories = categories.filter(c => c !== cat);
+                saveCats();
+                renderCatsManager();
+            }
+        }
+
+        function renderQuickCategoriesSidebar() {
+            const container = document.getElementById('quickCategories');
+            container.innerHTML = categories.map(c => `
+                <div class="cat-nav-item ${currentView === 'category:' + c ? 'active' : ''}" onclick="setView('category:${c}')">
+                    <span class="cat-dot"></span>
+                    <span>${c}</span>
+                </div>
+            `).join('');
+        }
+
+        function populateCatSelect() {
+            const select = document.getElementById('taskCategory');
+            select.innerHTML = '<option value="">-- اختر التصنيف --</option>' + 
+                               categories.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        // --- DEPARTMENTS MANAGER ---
+        function openDeptsModal() {
+            renderDeptsManager();
+            document.getElementById('deptsModal').classList.add('active');
+        }
+
+        function closeDeptsModal() {
+            document.getElementById('deptsModal').classList.remove('active');
+        }
+
+        function renderDeptsManager() {
+            const container = document.getElementById('deptsList');
+            container.innerHTML = departments.map(d => `
+                <div class="dept-item">
+                    <span>${d}</span>
+                    <button onclick="removeDept('${d}')" style="background:none; border:none; color:var(--danger); cursor:pointer;">🗑️ حذف</button>
+                </div>
+            `).join('');
+        }
+
+        function addNewDept() {
+            const input = document.getElementById('newDeptInput');
+            const val = input.value.trim();
+            if (val && !departments.includes(val)) {
+                departments.push(val);
+                saveDepts();
+                renderDeptsManager();
+                input.value = '';
+                showToast('تمت إضافة القسم', 'success');
+            }
+        }
+
+        function removeDept(dept) {
+            if (confirm(`حذف قسم "${dept}"؟`)) {
+                departments = departments.filter(d => d !== dept);
+                saveDepts();
+                renderDeptsManager();
+            }
+        }
+
+        function populateDeptSelect() {
+            const select = document.getElementById('taskDepartment');
+            select.innerHTML = departments.map(d => `<option value="${d}">${d}</option>`).join('');
+        }
+
+        // --- RENDER TASKS (MAIN LOGIC) ---
+        
+        // Define filterTasks to simply trigger a re-render
+        function filterTasks() {
+            renderTasks();
+        }
+
+        function sortTasks(list) {
+            const criteria = document.getElementById('sortCriteria')?.value || 'createdAtDesc';
+
+            list.sort((a, b) => {
+                // Priority Sorting (Desc)
+                if (criteria === 'priorityDesc') {
+                    const priorityOrder = { 'عاجل': 3, 'مهم': 2, 'عادي': 1 };
+                    return priorityOrder[b.priority] - priorityOrder[a.priority];
+                } 
+                
+                // Due Date Sorting (Asc) - Push null dates (no date) to the end
+                if (criteria === 'dueDateAsc') {
+                    const dateA = new Date(a.dueDate || '9999-12-31');
+                    const dateB = new Date(b.dueDate || '9999-12-31');
+                    return dateA - dateB;
+                }
+
+                // Default: Created At Sorting (Desc - Newest First)
+                const dateA = new Date(a.createdAt);
+                const dateB = new Date(b.createdAt);
+                return dateB - dateA;
+            });
+            return list;
+        }
+
+
+        function renderTasks() {
+            let filtered = filterTasksList([...tasks]);
+            
+            // Apply sorting
+            filtered = sortTasks(filtered);
+
+            const container = document.getElementById('tasksList');
+            container.innerHTML = '';
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding: 4rem; grid-column: 1/-1; color: var(--text-secondary);"><h3>لا توجد مهام مطابقة</h3></div>';
+                return;
+            }
+
+            // KANBAN
+            if (viewMode === 'board') {
+                container.className = 'tasks-grid board-view';
+                const statuses = ['جديد', 'قيد التنفيذ', 'معلق', 'مكتمل'];
+                const statusIcons = {'جديد': '🆕', 'قيد التنفيذ': '⚡', 'معلق': '⏳', 'مكتمل': '✅'};
+                
+                statuses.forEach(status => {
+                    const tasksInStatus = filtered.filter(t => t.status === status);
+                    container.innerHTML += `
+                        <div class="kanban-column">
+                            <div class="kanban-header">
+                                <span>${statusIcons[status]} ${status}</span>
+                                <span class="badge badge-normal">${tasksInStatus.length}</span>
+                            </div>
+                            <div class="kanban-tasks" ondrop="drop(event, '${status}')" ondragover="allowDrop(event)">
+                                ${tasksInStatus.map(t => createCompactTaskCard(t)).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+                return;
+            }
+
+            // LIST & TILES
+            container.className = `tasks-grid ${viewMode}-view`;
+            container.innerHTML = filtered.map(t => createTaskCard(t)).join('');
+        }
+
+        function filterTasksList(list) {
+            // Main Views
+            if (currentView === 'urgent') list = list.filter(t => t.priority === 'عاجل' && t.status !== 'مكتمل');
+            else if (currentView === 'today') {
+                const today = new Date().toISOString().split('T')[0];
+                list = list.filter(t => t.dueDate === today);
+            }
+            else if (currentView === 'overdue') {
+                const today = new Date().toISOString().split('T')[0];
+                list = list.filter(t => t.dueDate < today && t.status !== 'مكتمل');
+            }
+            // Category Filter
+            else if (currentView.startsWith('category:')) {
+                const cat = currentView.split(':')[1];
+                list = list.filter(t => t.category === cat);
+            }
+            
+            // Search Box
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            if (search) {
+                list = list.filter(t => 
+                    t.title.toLowerCase().includes(search) || 
+                    (t.responsible && t.responsible.toLowerCase().includes(search)) ||
+                    (t.department && t.department.toLowerCase().includes(search)) ||
+                    (t.category && t.category.toLowerCase().includes(search))
+                );
+            }
+            return list;
+        }
+
+        function calculateTaskProgress(task) {
+            if (task.status === 'مكتمل') return 100;
+            if (task.subtasks && task.subtasks.length > 0) {
+                const done = task.subtasks.filter(s => s.completed).length;
+                return Math.round((done / task.subtasks.length) * 100);
+            }
+            return 0;
+        }
+
+        function createTaskCard(t) {
+            const progress = calculateTaskProgress(t);
+            return `
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-title" onclick="openTaskModal(${t.id})">${t.title}</div>
+                    </div>
+                    <div class="task-badges">
+                        <span class="badge badge-${getPriorityClass(t.priority)}">${t.priority}</span>
+                        <span class="badge badge-${t.status === 'مكتمل' ? 'completed' : 'normal'}">${t.status}</span>
+                        ${t.category ? `<span class="badge badge-category">${t.category}</span>` : ''}
+                        <span class="badge">${t.department || 'عام'}</span>
+                    </div>
+                    <div style="margin: 0.6rem 0; color: var(--text-secondary); font-size: 0.85rem;">
+                        👤 ${t.responsible} ${t.approver ? ` | 👔 ${t.approver}` : ''}
+                        <br>📅 ${t.dueDate || 'بدون تاريخ'}
+                        ${t.subtasks && t.subtasks.length > 0 ? ` • ☑️ ${t.subtasks.filter(s=>s.completed).length}/${t.subtasks.length}` : ''}
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: ${progress}%"></div></div>
+                    <div class="task-actions">
+                        <button class="action-btn" onclick="openTaskModal(${t.id})" title="تعديل">✏️</button>
+                        <button class="action-btn" onclick="deleteTask(${t.id})" title="حذف">🗑️</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Updated to include draggable attribute
+        function createCompactTaskCard(t) {
+            const progress = calculateTaskProgress(t);
+            // Added draggable="true" and ondragstart for Kanban drag-and-drop
+            return `
+                <div class="task-card" draggable="true" ondragstart="drag(event, ${t.id})" onclick="openTaskModal(${t.id})" style="margin-bottom: 0.5rem; padding: 0.8rem;">
+                    <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 0.4rem;">${t.title}</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:0.2rem; margin-bottom:0.4rem;">
+                         ${t.category ? `<span class="badge badge-category" style="font-size:0.6rem">${t.category}</span>` : ''}
+                         <span class="badge badge-${getPriorityClass(t.priority)}" style="font-size: 0.6rem;">${t.priority}</span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary);">👤 ${t.responsible}</div>
+                    <div style="margin-top:0.4rem; height:4px; background:rgba(255,255,255,0.1); border-radius:2px;">
+                         <div style="width:${progress}%; height:100%; background:var(--accent);"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Drag and Drop Logic for Kanban ---
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev, taskId) {
+            ev.dataTransfer.setData("text", taskId);
+            // Optional visual cue while dragging
+            ev.currentTarget.style.opacity = '0.4'; 
+        }
+
+        function drop(ev, newStatus) {
+            ev.preventDefault();
+            const taskId = ev.dataTransfer.getData("text");
+            
+            // Reset opacity of the dragged task element (since we're about to re-render, this is mainly for visual feedback)
+            const taskElement = document.querySelector(`.task-card[ondragstart*="${taskId}"]`);
+            if (taskElement) taskElement.style.opacity = '1';
+
+            const task = tasks.find(t => t.id == taskId);
+            
+            if (task && task.status !== newStatus) {
+                task.status = newStatus;
+                saveTasks();
+                renderTasks(); // Re-render the board to reflect the change
+                showToast(`تم تغيير حالة المهمة #${taskId} إلى ${newStatus}`, 'success');
+            }
+        }
+        // --- End Drag and Drop Logic ---
+
+
+        // --- SUBTASKS ---
+        function renderSubtasks() {
+            const container = document.getElementById('subtasksList');
+            if (tempSubtasks.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-secondary); font-size:0.8rem;">لا توجد مهام فرعية.</p>';
+                return;
+            }
+            container.innerHTML = tempSubtasks.map((st, index) => `
+                <div class="subtask-item">
+                    <input type="checkbox" ${st.completed ? 'checked' : ''} onchange="toggleSubtask(${index})" style="width: 16px; height: 16px;">
+                    <span style="flex: 1; font-size:0.9rem; text-decoration: ${st.completed ? 'line-through' : 'none'}; color: ${st.completed ? 'var(--text-secondary)' : 'var(--text-primary)'}">${st.text}</span>
+                    <button type="button" onclick="deleteSubtask(${index})" style="background:none; border:none; cursor:pointer; color:var(--danger)">×</button>
+                </div>
+            `).join('');
+        }
+
+        function addSubtask() {
+            const input = document.getElementById('newSubtaskInput');
+            const text = input.value.trim();
+            if (text) {
+                tempSubtasks.push({ text: text, completed: false });
+                input.value = '';
+                renderSubtasks();
+            }
+        }
+
+        function deleteSubtask(index) {
+            tempSubtasks.splice(index, 1);
+            renderSubtasks();
+        }
+
+        function toggleSubtask(index) {
+            tempSubtasks[index].completed = !tempSubtasks[index].completed;
+            renderSubtasks();
+        }
+
+        // --- MODAL FUNCTIONS ---
+        function openTaskModal(taskId = null) {
+            editingTaskId = taskId;
+            populateDeptSelect();
+            populateCatSelect(); // Load categories
+            const modal = document.getElementById('taskModal');
+            
+            if (taskId) {
+                const task = tasks.find(t => t.id === taskId);
+                if (task) {
+                    document.getElementById('modalTitle').textContent = '✏️ تعديل المهمة';
+                    document.getElementById('taskTitle').value = task.title;
+                    document.getElementById('taskDepartment').value = task.department || departments[0];
+                    document.getElementById('taskCategory').value = task.category || ''; // Set category
+                    document.getElementById('taskResponsible').value = task.responsible;
+                    document.getElementById('taskApprover').value = task.approver || '';
+                    document.getElementById('taskDueDate').value = task.dueDate;
+                    document.getElementById('taskPriority').value = task.priority;
+                    document.getElementById('taskStatus').value = task.status;
+                    document.getElementById('taskNotes').value = task.notes || '';
+                    
+                    tempSubtasks = task.subtasks ? JSON.parse(JSON.stringify(task.subtasks)) : [];
+                    renderSubtasks();
+
+                    renderDocuments(task.documents || []);
+                    renderComments(task.comments || []);
+                }
+            } else {
+                document.getElementById('modalTitle').textContent = '✨ مهمة جديدة';
+                document.getElementById('taskForm').reset();
+                tempSubtasks = [];
+                renderSubtasks();
+                document.getElementById('taskDocuments').innerHTML = '';
+                document.getElementById('taskComments').innerHTML = '';
+            }
+            
+            switchTab('details');
+            modal.classList.add('active');
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModal').classList.remove('active');
+            editingTaskId = null;
+        }
+
+        document.getElementById('taskForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const taskData = {
+                title: document.getElementById('taskTitle').value,
+                department: document.getElementById('taskDepartment').value,
+                category: document.getElementById('taskCategory').value, // Save category
+                responsible: document.getElementById('taskResponsible').value,
+                approver: document.getElementById('taskApprover').value,
+                dueDate: document.getElementById('taskDueDate').value,
+                priority: document.getElementById('taskPriority').value,
+                status: document.getElementById('taskStatus').value,
+                notes: document.getElementById('taskNotes').value,
+                subtasks: tempSubtasks,
+                documents: editingTaskId ? tasks.find(t => t.id === editingTaskId).documents : [],
+                comments: editingTaskId ? tasks.find(t => t.id === editingTaskId).comments : []
+            };
+            
+            if (editingTaskId) {
+                const idx = tasks.findIndex(t => t.id === editingTaskId);
+                tasks[idx] = { ...tasks[idx], ...taskData };
+                showToast('تم تحديث المهمة بنجاح', 'success');
+            } else {
+                tasks.push({ id: Date.now(), ...taskData, createdAt: new Date().toISOString() });
+                showToast('تم إنشاء المهمة بنجاح', 'success');
+            }
+            
+            saveTasks();
+            closeTaskModal();
+            renderTasks();
+            updateBadges();
+        });
+
+        // --- UTILS ---
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span style="font-size: 1.2rem">${type === 'success' ? '✅' : 'ℹ️'}</span><div>${message}</div>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            if (!editingTaskId) { showToast('يرجى حفظ المهمة أولاً قبل رفع الملفات', 'error'); return; }
+            
+            const taskIndex = tasks.findIndex(t => t.id === editingTaskId);
+            const currentDocs = tasks[taskIndex].documents || [];
+
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentDocs.push({ name: file.name, data: e.target.result });
+                    tasks[taskIndex].documents = currentDocs;
+                    saveTasks();
+                    renderDocuments(currentDocs);
+                    showToast('تم رفع الملف بنجاح', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function renderDocuments(docs) {
+            const container = document.getElementById('taskDocuments');
+            container.innerHTML = docs.map((d, i) => `
+                <div style="display:flex; justify-content:space-between; padding:0.5rem; background:var(--bg-card); border:1px solid var(--border); margin-bottom:0.5rem; border-radius:4px;">
+                    <span>📄 ${d.name}</span>
+                    <button type="button" onclick="downloadDoc(${i})" style="cursor:pointer; background:none; border:none;">⬇️</button>
+                </div>
+            `).join('');
+        }
+        
+        function renderComments(comments) {
+            const container = document.getElementById('taskComments');
+            container.innerHTML = comments.map(c => `
+                <div style="background:var(--bg-card); padding:0.6rem; border-radius:6px; margin-bottom:0.4rem; border-right:2px solid var(--accent);">
+                    <div style="font-size:0.75rem; color:var(--text-secondary);">${c.user || 'مستخدم'} - ${new Date(c.time).toLocaleTimeString()}</div>
+                    <div style="font-size:0.9rem;">${c.text}</div>
+                </div>
+            `).join('');
+        }
+
+        function addComment() {
+            const input = document.getElementById('newComment');
+            const text = input.value.trim();
+            if (text && editingTaskId) {
+                const idx = tasks.findIndex(t => t.id === editingTaskId);
+                if (!tasks[idx].comments) tasks[idx].comments = [];
+                // Hardcoded user for simplicity, should be dynamic in a real app
+                tasks[idx].comments.push({ text: text, time: new Date().toISOString(), user: 'معاذ' }); 
+                saveTasks();
+                renderComments(tasks[idx].comments);
+                input.value = '';
+            }
+        }
+
+        function downloadDoc(index) {
+            if (!editingTaskId) return;
+            const task = tasks.find(t => t.id === editingTaskId);
+            const doc = task.documents[index];
+            const link = document.createElement('a');
+            link.href = doc.data;
+            link.download = doc.name;
+            link.click();
+        }
+
+        function deleteTask(id) {
+            if (confirm('هل أنت متأكد من حذف هذه المهمة؟')) {
+                tasks = tasks.filter(t => t.id !== id);
+                saveTasks();
+                renderTasks();
+                updateBadges();
+                showToast('تم الحذف', 'error');
+            }
+        }
+
+        function switchViewMode(mode) {
+            viewMode = mode;
+            document.querySelectorAll('.view-mode-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('view' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+            renderTasks();
+        }
+
+        function setView(view) {
+            currentView = view;
+            
+            // Handle active state
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.querySelectorAll('.cat-nav-item').forEach(i => i.classList.remove('active'));
+            
+            if (view.startsWith('category:')) {
+                // Highlight category item
+                const catName = view.split(':')[1];
+                const catItem = Array.from(document.querySelectorAll('.cat-nav-item')).find(el => el.textContent.includes(catName));
+                if(catItem) catItem.classList.add('active');
+            } else {
+                // Highlight standard nav item
+                const navItem = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick').includes(view));
+                if(navItem) navItem.classList.add('active');
+            }
+            
+            // Update Headers
+            if(view === 'all') { document.getElementById('pageTitle').textContent = 'جميع المهام'; }
+            else if(view === 'urgent') { document.getElementById('pageTitle').textContent = 'المهام العاجلة'; }
+            else if(view === 'today') { document.getElementById('pageTitle').textContent = 'مهام اليوم'; }
+            else if(view === 'overdue') { document.getElementById('pageTitle').textContent = 'المهام المتأخرة'; }
+            else if(view.startsWith('category:')) { document.getElementById('pageTitle').textContent = 'تصنيف: ' + view.split(':')[1]; }
+
+            renderTasks();
+        }
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            // Note: event.target is implicit in the original code, we assume it's available or explicitly pass it if needed, but here it's fine.
+            // Using the new approach to find the tab button based on tabName to be safe.
+             document.querySelector(`.tabs .tab[onclick*="${tabName}"]`).classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        function updateBadges() {
+            document.getElementById('totalBadge').textContent = tasks.length;
+            document.getElementById('urgentBadge').textContent = tasks.filter(t => t.priority === 'عاجل' && t.status !== 'مكتمل').length;
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('overdueBadge').textContent = tasks.filter(t => t.dueDate < today && t.status !== 'مكتمل').length;
+        }
+        
+        function getPriorityClass(p) { return { 'عاجل': 'urgent', 'مهم': 'important' }[p] || 'normal'; }
+
+        function openStatsModal() {
+            const modal = document.getElementById('statsModal');
+            const container = document.getElementById('statsContent');
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.status === 'مكتمل').length;
+            const urgent = tasks.filter(t => t.priority === 'عاجل').length;
+            
+            container.innerHTML = `
+                <div style="background:var(--bg-card); padding:1rem; border-radius:8px;"><h3>${total}</h3><p>الكل</p></div>
+                <div style="background:var(--bg-card); padding:1rem; border-radius:8px; color:var(--success);"><h3>${completed}</h3><p>مكتمل</p></div>
+                <div style="background:var(--bg-card); padding:1rem; border-radius:8px; color:var(--danger);"><h3>${urgent}</h3><p>عاجل</p></div>
+                <div style="background:var(--bg-card); padding:1rem; border-radius:8px;"><h3>${Math.round((completed/total)*100 || 0)}%</h3><p>نسبة الإنجاز</p></div>
+            `;
+            modal.classList.add('active');
+        }
+
+        function exportDataCSV() {
+            let csv = '\uFEFFالعنوان,القسم,التصنيف,المسؤول,الموافق,التاريخ,الحالة,الأولوية\n';
+            tasks.forEach(t => {
+                csv += `"${t.title}","${t.department||''}","${t.category||''}","${t.responsible}","${t.approver||''}","${t.dueDate}","${t.status}","${t.priority}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tasks_v2.csv';
+            a.click();
+            showToast('تم تصدير الملف بنجاح', 'success');
+        }
+    </script>
+</body>
+</html>
